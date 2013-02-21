@@ -22,8 +22,8 @@
 	<!-- Optional add this file to override any of the properties below -->
 	<property file="${basedir}/build/build.properties"/>
 	<property name="version.major" value="2"/>
-	<property name="version.minor" value="6"/>
-	<property name="version.revision" value="3"/>
+	<property name="version.minor" value="7"/>
+	<property name="version.revision" value="0 beta 1"/>
 
 	<property name="version.extra" value="12555"/>
 

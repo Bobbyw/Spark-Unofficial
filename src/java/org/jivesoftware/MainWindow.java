@@ -746,7 +746,18 @@ public final class MainWindow extends ChatFrame implements ActionListener {
      * Displays the About Box for Spark.
      */
     private static void showAboutBox() {
-        JOptionPane.showMessageDialog(SparkManager.getMainWindow(), Default.getString(Default.APPLICATION_NAME) + " " + JiveInfo.getVersion(),
+    	String aboutBoxText = 
+    			Default.getString(Default.APPLICATION_NAME) + " " + JiveInfo.getVersion() + "\n" + 
+    			Default.getString(Default.BUILD_DATE);
+    	String application_Info1 = Default.getString(Default.APPLICATION_INFO1);
+    	String application_Info2 = Default.getString(Default.APPLICATION_INFO2);
+    	if (!(application_Info1.equalsIgnoreCase(""))) {
+    		aboutBoxText += "\n" + application_Info1;
+    	}
+    	if (!(application_Info2.equalsIgnoreCase(""))) {
+    		aboutBoxText += "\n" + application_Info2;
+    	}
+        JOptionPane.showMessageDialog(SparkManager.getMainWindow(), aboutBoxText,
             Res.getString("title.about"), JOptionPane.INFORMATION_MESSAGE, SparkRes.getImageIcon(SparkRes.MAIN_IMAGE));
     }
 
