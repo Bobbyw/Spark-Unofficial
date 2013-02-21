@@ -140,6 +140,7 @@ public class ThemePanel extends JPanel {
 		"com.jtattoo.plaf.mint.MintLookAndFeel",
 		//"com.jtattoo.plaf.noire.NoireLookAndFeel",
 		"com.jtattoo.plaf.smart.SmartLookAndFeel",
+		"com.jtattoo.plaf.texture.TextureLookAndFeel",
 		//Substance
 		//"org.jvnet.substance.skin.SubstanceAutumnLookAndFeel",
 		"org.jvnet.substance.skin.SubstanceBusinessBlackSteelLookAndFeel",
