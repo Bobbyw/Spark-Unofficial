@@ -1,14 +1,29 @@
 /*
- * Copyright 2005 MH-Software-Entwicklung. All rights reserved.
- * Use is subject to license terms.
- */
+* Copyright (c) 2002 and later by MH Software-Entwicklung. All Rights Reserved.
+* 
+* JTattoo is dual licensed. You can use it under the terms and conditions of the
+* GNU General Public License version 2.0 or later as published by the Free Software
+* Foundation.
+* 
+* see: gpl-2.0.txt
+* 
+* Registered users (this who payed for a license) could use the software under the
+* terms and conditions of the GNU Lesser General Public License version 2.0 or later
+* with classpath exception as published by the Free Software Foundation.
+* 
+* see: lgpl-2.0.txt
+* see: classpath-exception.txt
+*/
+
 package com.jtattoo.plaf;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.plaf.*;
+import javax.swing.plaf.ColorUIResource;
+import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.*;
+import javax.swing.text.View;
 
 /**
  * @author Michael Hagen
@@ -23,14 +38,23 @@ public class BaseButtonUI extends BasicButtonUI {
         return new BaseButtonUI();
     }
 
+    protected void installKeyboardActions(AbstractButton b) {
+        super.installKeyboardActions(b);
+        InputMap im = (InputMap) UIManager.get("Button.focusInputMap");
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, false), "pressed");
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, true), "released");
+    }
+
     public void installDefaults(AbstractButton b) {
         super.installDefaults(b);
         b.setOpaque(false);
+        b.setRolloverEnabled(true);
     }
 
     public void uninstallDefaults(AbstractButton b) {
         super.uninstallDefaults(b);
         b.setOpaque(true);
+        b.setRolloverEnabled(false);
     }
 
     protected BasicButtonListener createButtonListener(AbstractButton b) {
@@ -44,20 +68,18 @@ public class BaseButtonUI extends BasicButtonUI {
 
         int width = b.getWidth();
         int height = b.getHeight();
-        Color colors[] = null;
+        Color colors[] = AbstractLookAndFeel.getTheme().getButtonColors();
         ButtonModel model = b.getModel();
         if (b.isEnabled()) {
             if (b.getBackground() instanceof ColorUIResource) {
                 if (model.isPressed() && model.isArmed()) {
                     colors = AbstractLookAndFeel.getTheme().getPressedColors();
                 } else {
-                    if (model.isRollover()) {
+                    if (b.isRolloverEnabled() && model.isRollover()) {
                         colors = AbstractLookAndFeel.getTheme().getRolloverColors();
                     } else {
                         if (AbstractLookAndFeel.getTheme().doShowFocusFrame() && b.hasFocus()) {
                             colors = AbstractLookAndFeel.getTheme().getFocusColors();
-                        } else {
-                            colors = AbstractLookAndFeel.getTheme().getButtonColors();
                         }
                     }
                 }
@@ -65,7 +87,7 @@ public class BaseButtonUI extends BasicButtonUI {
                 if (model.isPressed() && model.isArmed()) {
                     colors = ColorHelper.createColorArr(b.getBackground(), ColorHelper.darker(b.getBackground(), 50), 20);
                 } else {
-                    if (model.isRollover()) {
+                    if (b.isRolloverEnabled() && model.isRollover()) {
                         colors = ColorHelper.createColorArr(ColorHelper.brighter(b.getBackground(), 80), ColorHelper.brighter(b.getBackground(), 20), 20);
                     } else {
                         colors = ColorHelper.createColorArr(ColorHelper.brighter(b.getBackground(), 40), ColorHelper.darker(b.getBackground(), 20), 20);
@@ -102,7 +124,13 @@ public class BaseButtonUI extends BasicButtonUI {
             if (model.isArmed() && model.isPressed()) {
                 offs = 1;
             }
-            g.setColor(b.getForeground());
+            if (model.isRollover()) {
+                g.setColor(AbstractLookAndFeel.getTheme().getRolloverForegroundColor());
+            } else if (model.isPressed()) {
+                g.setColor(AbstractLookAndFeel.getTheme().getPressedForegroundColor());
+            } else {
+                g.setColor(b.getForeground());
+            }
             JTattooUtilities.drawStringUnderlineCharAt(b, g, b.getText(), mnemIndex, textRect.x + offs, textRect.y + offs + fm.getAscent());
         } else {
             g.setColor(Color.white);
@@ -149,11 +177,11 @@ public class BaseButtonUI extends BasicButtonUI {
 
         if (b.getIcon() != null) {
             if (!b.isEnabled()) {
-                Composite composite = g2D.getComposite();
+                Composite savedComposite = g2D.getComposite();
                 AlphaComposite alpha = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
                 g2D.setComposite(alpha);
                 paintIcon(g, c, iconRect);
-                g2D.setComposite(composite);
+                g2D.setComposite(savedComposite);
             } else {
                 if (b.getModel().isPressed() && b.getModel().isRollover()) {
                     iconRect.x++;

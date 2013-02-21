@@ -1,10 +1,29 @@
 /*
- * Copyright 2005 MH-Software-Entwicklung. All rights reserved.
- * Use is subject to license terms.
- */
+* Copyright (c) 2002 and later by MH Software-Entwicklung. All Rights Reserved.
+*  
+* JTattoo is multiple licensed. If your are an open source developer you can use
+* it under the terms and conditions of the GNU General Public License version 2.0
+* or later as published by the Free Software Foundation.
+*  
+* see: gpl-2.0.txt
+* 
+* If you pay for a license you will become a registered user who could use the
+* software under the terms and conditions of the GNU Lesser General Public License
+* version 2.0 or later with classpath exception as published by the Free Software
+* Foundation.
+* 
+* see: lgpl-2.0.txt
+* see: classpath-exception.txt
+* 
+* Registered users could also use JTattoo under the terms and conditions of the 
+* Apache License, Version 2.0 as published by the Apache Software Foundation.
+*  
+* see: APACHE-LICENSE-2.0.txt
+*/
+
 package com.jtattoo.plaf;
 
-import java.awt.*;
+import java.awt.Color;
 
 /**
  * @author Michael Hagen
@@ -14,8 +33,8 @@ public class ColorHelper {
     private ColorHelper() {
     }
 
-    public static final Color createColor(int r, int g, int b) {
-        return new Color(((r & 0xFF) << 16) | ((g & 0xFF) << 8) | ((b & 0xFF) << 0));
+    public static Color createColor(int r, int g, int b) {
+        return new Color(((r & 0xFF) << 16) | ((g & 0xFF) << 8) | ((b & 0xFF)));
     }
 
     public static Color[] createColorArr(Color c1, Color c2, int steps) {
@@ -96,6 +115,14 @@ public class ColorHelper {
         double g = c.getGreen();
         double b = c.getBlue();
         return Math.min(255, (int) (r * 0.28 + g * 0.59 + b * 0.13));
+    }
+    
+    public static int getGrayValue(Color[] ca) {
+        int sum = 0;
+        for (int i = 0; i < ca.length; i++) {
+            sum += getGrayValue(ca[i]);
+        }
+        return (sum / ca.length);
     }
 
     public static Color toGray(Color c) {

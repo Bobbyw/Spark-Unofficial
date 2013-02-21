@@ -1,14 +1,34 @@
 /*
- * Copyright 2005 MH-Software-Entwicklung. All rights reserved.
- * Use is subject to license terms.
- */
+* Copyright (c) 2002 and later by MH Software-Entwicklung. All Rights Reserved.
+*  
+* JTattoo is multiple licensed. If your are an open source developer you can use
+* it under the terms and conditions of the GNU General Public License version 2.0
+* or later as published by the Free Software Foundation.
+*  
+* see: gpl-2.0.txt
+* 
+* If you pay for a license you will become a registered user who could use the
+* software under the terms and conditions of the GNU Lesser General Public License
+* version 2.0 or later with classpath exception as published by the Free Software
+* Foundation.
+* 
+* see: lgpl-2.0.txt
+* see: classpath-exception.txt
+* 
+* Registered users could also use JTattoo under the terms and conditions of the 
+* Apache License, Version 2.0 as published by the Apache Software Foundation.
+*  
+* see: APACHE-LICENSE-2.0.txt
+*/
+
 package com.jtattoo.plaf;
 
 import java.awt.*;
 import javax.swing.*;
-import javax.swing.text.*;
-import javax.swing.plaf.*;
+import javax.swing.plaf.ColorUIResource;
+import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.*;
+import javax.swing.text.View;
 
 public class BaseToggleButtonUI extends BasicToggleButtonUI {
 
@@ -24,6 +44,7 @@ public class BaseToggleButtonUI extends BasicToggleButtonUI {
     public void installDefaults(AbstractButton b) {
         super.installDefaults(b);
         b.setOpaque(false);
+        b.setRolloverEnabled(true);
         Color cArr[] = AbstractLookAndFeel.getTheme().getPressedColors();
         rolloverPressedColors = new Color[cArr.length];
         for (int i = 0; i < cArr.length; i++) {
@@ -34,6 +55,7 @@ public class BaseToggleButtonUI extends BasicToggleButtonUI {
     public void uninstallDefaults(AbstractButton b) {
         super.uninstallDefaults(b);
         b.setOpaque(true);
+        b.setRolloverEnabled(false);
     }
 
     protected BasicButtonListener createButtonListener(AbstractButton b) {
@@ -53,7 +75,7 @@ public class BaseToggleButtonUI extends BasicToggleButtonUI {
             if (b.getBackground() instanceof ColorUIResource) {
                 if (model.isPressed() && model.isArmed()) {
                     colors = AbstractLookAndFeel.getTheme().getPressedColors();
-                } else  if (model.isRollover()) {
+                } else  if (b.isRolloverEnabled() && model.isRollover()) {
                     if (model.isSelected()) {
                         colors = rolloverPressedColors;
                     } else {
@@ -71,7 +93,7 @@ public class BaseToggleButtonUI extends BasicToggleButtonUI {
             } else {
                 if (model.isPressed() && model.isArmed()) {
                     colors = ColorHelper.createColorArr(b.getBackground(), ColorHelper.darker(b.getBackground(), 50), 20);
-                } else  if (model.isRollover()) {
+                } else  if (b.isRolloverEnabled() && model.isRollover()) {
                     colors = ColorHelper.createColorArr(ColorHelper.brighter(b.getBackground(), 80), ColorHelper.brighter(b.getBackground(), 20), 20);
                 } else if (model.isSelected()) {
                     colors = ColorHelper.createColorArr(b.getBackground(), ColorHelper.darker(b.getBackground(), 50), 20);
@@ -100,7 +122,11 @@ public class BaseToggleButtonUI extends BasicToggleButtonUI {
             if ((model.isArmed() && model.isPressed()) || model.isSelected()) {
                 offs = 1;
             }
-            g.setColor(b.getForeground());
+            if (model.isRollover()) {
+                g.setColor(AbstractLookAndFeel.getTheme().getRolloverForegroundColor());
+            } else {
+                g.setColor(b.getForeground());
+            }
             JTattooUtilities.drawStringUnderlineCharAt(b, g, text, mnemIndex, textRect.x + offs, textRect.y + offs + fm.getAscent());
         } else {
             g.setColor(Color.white);
@@ -143,11 +169,11 @@ public class BaseToggleButtonUI extends BasicToggleButtonUI {
 
         if (b.getIcon() != null) {
             if (!b.isEnabled()) {
-                Composite composite = g2D.getComposite();
+                Composite savedComposite = g2D.getComposite();
                 AlphaComposite alpha = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f);
                 g2D.setComposite(alpha);
                 paintIcon(g, c, iconRect);
-                g2D.setComposite(composite);
+                g2D.setComposite(savedComposite);
             } else {
                 paintIcon(g, c, iconRect);
             }

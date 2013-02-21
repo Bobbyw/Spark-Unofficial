@@ -2,14 +2,38 @@
  * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
  * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
+/*
+* Copyright (c) 2002 and later by MH Software-Entwicklung. All Rights Reserved.
+*  
+* JTattoo is multiple licensed. If your are an open source developer you can use
+* it under the terms and conditions of the GNU General Public License version 2.0
+* or later as published by the Free Software Foundation.
+*  
+* see: gpl-2.0.txt
+* 
+* If you pay for a license you will become a registered user who could use the
+* software under the terms and conditions of the GNU Lesser General Public License
+* version 2.0 or later with classpath exception as published by the Free Software
+* Foundation.
+* 
+* see: lgpl-2.0.txt
+* see: classpath-exception.txt
+* 
+* Registered users could also use JTattoo under the terms and conditions of the 
+* Apache License, Version 2.0 as published by the Apache Software Foundation.
+*  
+* see: APACHE-LICENSE-2.0.txt
+*/
+
 package com.jtattoo.plaf;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.beans.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.*;
-import javax.swing.plaf.*;
+import javax.swing.plaf.UIResource;
 
 /**
  * This class is a modified copy of the javax.swing.plaf.metal.MetalTitlePaneUI
@@ -57,7 +81,7 @@ public class BaseTitlePane extends JComponent {
     protected boolean useMaximizedBounds = true;
 
     public BaseTitlePane(JRootPane root, BaseRootPaneUI ui) {
-        this.rootPane = root;
+        rootPane = root;
         rootPaneUI = ui;
         state = -1;
         iconifyIcon = UIManager.getIcon("InternalFrame.iconifyIcon");
@@ -111,7 +135,7 @@ public class BaseTitlePane extends JComponent {
         }
         return null;
     }
-
+    
     protected Window getWindow() {
         return window;
     }
@@ -119,11 +143,44 @@ public class BaseTitlePane extends JComponent {
     protected int getWindowDecorationStyle() {
         return DecorationHelper.getWindowDecorationStyle(rootPane);
     }
+    
+    protected boolean isMacStyleWindowDecoration() {
+        return AbstractLookAndFeel.getTheme().isMacStyleWindowDecorationOn();
+    }
 
     protected Image getFrameIconImage() {
-        return (getFrame() != null) ? getFrame().getIconImage() : null;
+        // try to find icon for dialog windows
+        if (getFrame() == null && JTattooUtilities.getJavaVersion() >= 1.6) {
+            java.util.List icons = getWindow().getIconImages();
+            // No icon found ? search in window chain for an icon
+            if (icons == null || icons.isEmpty()) {
+                Window owner = getWindow().getOwner();
+                while (owner != null) {
+                    icons = owner.getIconImages();
+                    // found ? return the icon
+                    if (icons != null && !icons.isEmpty()) {
+                        return (Image)(icons.get(0));
+                    }
+                    owner = owner.getOwner();
+                }
+            } else {
+                return (Image)(icons.get(0));
+            }
+            // No icon found ?  return icon of the first frame
+            if (icons == null || icons.isEmpty()) {
+                if (Frame.getFrames() != null && Frame.getFrames().length > 0) {
+                    return Frame.getFrames()[0].getIconImage();
+                }
+            }
+            return null;
+        } else {
+            if (getFrame() != null) {
+                return getFrame().getIconImage();
+            }
+        }
+        return null;
     }
-    
+
     public void addNotify() {
         super.addNotify();
         uninstallListeners();
@@ -146,25 +203,24 @@ public class BaseTitlePane extends JComponent {
     }
 
     protected void installSubcomponents() {
+        createActions();
+        createButtons();
         if (getWindowDecorationStyle() == BaseRootPaneUI.FRAME) {
-            createActions();
-            createMenuBar();
-            createCustomizedTitlePanel();
-            createButtons();
-            add(menuBar);
-            add(customTitlePanel);
+            if (!isMacStyleWindowDecoration()) {
+                createMenuBar();
+                add(menuBar);
+            }
             add(iconifyButton);
             add(maxButton);
-            add(closeButton);
-        } else {
-            createActions();
-            createButtons();
-            add(closeButton);
         }
+        add(closeButton);
     }
 
     protected void installDefaults() {
         setFont(UIManager.getFont("InternalFrame.titleFont"));
+        if (rootPane.getClientProperty("customTitlePanel") instanceof JPanel) {
+            setCustomizedTitlePanel((JPanel)rootPane.getClientProperty("customTitlePanel"));
+        }
     }
 
     protected void uninstallDefaults() {
@@ -193,7 +249,7 @@ public class BaseTitlePane extends JComponent {
                     mi.setMnemonic(mnemonic);
                 }
             }
-            menu.add(new JSeparator());
+            menu.addSeparator();
             mi = menu.add(closeAction);
             mnemonic = getInt("MetalTitlePane.closeMnemonic", -1);
             if (mnemonic != -1) {
@@ -204,21 +260,16 @@ public class BaseTitlePane extends JComponent {
         }
     }
 
-    public void createCustomizedTitlePanel() {
-        customTitlePanel = new JPanel();
-        customTitlePanel.setOpaque(false);
-    }
-
     public void setCustomizedTitlePanel(JPanel panel) {
-        remove(customTitlePanel);
+        if (customTitlePanel != null) {
+            remove(customTitlePanel);
+            customTitlePanel = null;
+        }
         if (panel != null) {
             customTitlePanel = panel;
-        } else {
-            remove(customTitlePanel);
-            customTitlePanel = new JPanel();
-            customTitlePanel.setOpaque(false);
+            add(customTitlePanel);
         }
-        add(customTitlePanel);
+        rootPane.putClientProperty("customTitlePanel", customTitlePanel);
         revalidate();
         repaint();
     }
@@ -395,7 +446,11 @@ public class BaseTitlePane extends JComponent {
     }
 
     protected int getVerSpacing() {
-        return 4;
+        return 3;
+    }
+    
+    protected boolean centerButtons() {
+        return true;
     }
 
     protected String getTitle() {
@@ -410,20 +465,42 @@ public class BaseTitlePane extends JComponent {
     public void paintBackground(Graphics g) {
         if (isActive()) {
             Graphics2D g2D = (Graphics2D) g;
-            Composite composite = g2D.getComposite();
+            Composite savedComposite = g2D.getComposite();
             if (backgroundImage != null) {
                 g.drawImage(backgroundImage, 0, 0, null);
                 AlphaComposite alpha = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alphaValue);
                 g2D.setComposite(alpha);
             }
             JTattooUtilities.fillHorGradient(g, AbstractLookAndFeel.getTheme().getWindowTitleColors(), 0, 0, getWidth(), getHeight());
-            g2D.setComposite(composite);
+            g2D.setComposite(savedComposite);
         } else {
             JTattooUtilities.fillHorGradient(g, AbstractLookAndFeel.getTheme().getWindowInactiveTitleColors(), 0, 0, getWidth(), getHeight());
         }
     }
 
+    protected int paintIcon(Graphics g, int x, int y) {
+        if (AbstractLookAndFeel.getTheme().isMacStyleWindowDecorationOn() || (getWindow() instanceof JDialog)) {
+            Image image = getFrameIconImage();
+            if (image != null) {
+                int h = getHeight();
+                int ih = image.getHeight(null);
+                int iw = image.getWidth(null);
+                if (ih <= h) {
+                    g.drawImage(image, x, (h - ih) / 2, iw, ih, null);
+                } else {
+                    double fac = (double)iw / (double)ih;
+                    ih = h;
+                    iw = (int)(fac * (double)ih);
+                    g.drawImage(image, x, 0, iw, ih, null);
+                }
+                return iw + 4;
+            }
+        }
+        return 0;
+    }
+    
     public void paintText(Graphics g, int x, int y, String title) {
+        x += paintIcon(g, x, y);
         if (isActive()) {
             g.setColor(AbstractLookAndFeel.getWindowTitleForegroundColor());
         } else {
@@ -444,7 +521,7 @@ public class BaseTitlePane extends JComponent {
         int height = getHeight();
         int titleWidth = width - buttonsWidth - 4;
         int xOffset = leftToRight ? 2 : width - 2;
-        if (getWindowDecorationStyle() == BaseRootPaneUI.FRAME) {
+        if (menuBar != null) {
             int mw = menuBar.getWidth() + 2;
             xOffset += leftToRight ? mw : -mw;
             titleWidth -= height;
@@ -457,6 +534,9 @@ public class BaseTitlePane extends JComponent {
         int yOffset = ((height - fm.getHeight()) / 2) + fm.getAscent() - 1;
         if (!leftToRight) {
             xOffset -= titleLength;
+        }
+        if (AbstractLookAndFeel.getTheme().isMacStyleWindowDecorationOn()) {
+            xOffset = Math.max(buttonsWidth + 5, (width - titleLength) / 2);
         }
         paintText(g, xOffset, yOffset, frameTitle);
     }
@@ -508,14 +588,11 @@ public class BaseTitlePane extends JComponent {
 //-----------------------------------------------------------------------------------------------
     protected class SystemMenuBar extends JMenuBar {
 
+        public SystemMenuBar() {
+            setOpaque(false);
+        }
+        
         public void paint(Graphics g) {
-            
-            Shape saveClip = g.getClip();
-            g.setClip(0, 0, getWidth(), getHeight());
-            BaseTitlePane.this.paintBackground(g);
-            BaseTitlePane.this.paintBorder(g);
-            g.setClip(saveClip);
-
             Image image = getFrameIconImage();
             if (image != null) {
                 int x = 0;
@@ -591,6 +668,14 @@ public class BaseTitlePane extends JComponent {
         }
 
         public void layoutContainer(Container c) {
+            if (AbstractLookAndFeel.getTheme().isMacStyleWindowDecorationOn()) {
+                layoutMacStyle(c);
+            } else {
+                layoutDefault(c);
+            }
+        }
+
+        public void layoutDefault(Container c) {
             boolean leftToRight = isLeftToRight();
 
             int spacing = getHorSpacing();
@@ -601,13 +686,13 @@ public class BaseTitlePane extends JComponent {
             int buttonHeight = h - getVerSpacing();
             int buttonWidth = buttonHeight;
 
-            int x = leftToRight ? spacing : w - buttonWidth - spacing;
+            int x = leftToRight ? w - spacing : 0;
             int y = Math.max(0, ((h - buttonHeight) / 2) - 1);
 
             int cpx = 0;
             int cpy = 0;
-            int cpw = getWidth();
-            int cph = getHeight();
+            int cpw = w;
+            int cph = h;
 
             if (menuBar != null) {
                 int mw = menuBar.getPreferredSize().width;
@@ -620,7 +705,6 @@ public class BaseTitlePane extends JComponent {
                 }
                 cpw -= 4 + mw;
             }
-            x = leftToRight ? w - spacing : 0;
             if (closeButton != null) {
                 x += leftToRight ? -buttonWidth : spacing;
                 closeButton.setBounds(x, y, buttonWidth, buttonHeight);
@@ -647,7 +731,7 @@ public class BaseTitlePane extends JComponent {
                 }
             }
             buttonsWidth = leftToRight ? w - x : x;
-           
+
             if (customTitlePanel != null) {
                 if (!leftToRight) {
                     cpx += buttonsWidth;
@@ -665,6 +749,45 @@ public class BaseTitlePane extends JComponent {
                 customTitlePanel.setBounds(cpx, cpy, cpw, cph);
             }
 
+        }
+
+        public void layoutMacStyle(Container c) {
+            int spacing = getHorSpacing();
+            int w = getWidth();
+            int h = getHeight();
+
+            // assumes all buttons have the same dimensions these dimensions include the borders
+            int buttonHeight = h - getVerSpacing() - 1;
+            int buttonWidth = buttonHeight;
+
+            int x = 2;
+            int y = centerButtons() ? Math.max(0, ((h - buttonHeight) / 2) - 1) : 0;
+
+            if (closeButton != null) {
+                closeButton.setBounds(x, y, buttonWidth, buttonHeight);
+                x += buttonWidth + spacing;
+            }
+            if ((iconifyButton != null) && (iconifyButton.getParent() != null)) {
+                iconifyButton.setBounds(x, y, buttonWidth, buttonHeight);
+                x += buttonWidth + spacing;
+            }
+            if ((maxButton != null) && (maxButton.getParent() != null)) {
+                if (DecorationHelper.isFrameStateSupported(Toolkit.getDefaultToolkit(), BaseRootPaneUI.MAXIMIZED_BOTH)) {
+                    maxButton.setBounds(x, y, buttonWidth, buttonHeight);
+                    x += buttonWidth + spacing;
+                }
+            }
+
+            buttonsWidth = x;
+
+            if (customTitlePanel != null) {
+                int cpx = buttonsWidth + 5;
+                int cpy = 0;
+                int cpw = customTitlePanel.getPreferredSize().width;
+                int cph = h;
+                customTitlePanel.setBounds(cpx, cpy, cpw, cph);
+                buttonsWidth += cpw + 5;
+            }
         }
     }
 
@@ -690,7 +813,7 @@ public class BaseTitlePane extends JComponent {
             // a call to setMaximizedBounds may cause an invalid frame size on multi screen environments
             // see: http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6699851
             // try and error to avoid the setMaximizedBounds bug
-            } else if (useMaximizedBounds && "windowMaximize".equals(name)) {
+            } else if (!JTattooUtilities.isMac() && useMaximizedBounds && "windowMaximize".equals(name)) {
                 Frame frame = getFrame();
                 if (frame != null) {
                     GraphicsConfiguration gc = frame.getGraphicsConfiguration();
@@ -703,7 +826,7 @@ public class BaseTitlePane extends JComponent {
                     // Keep taskbar visible
                     frame.setMaximizedBounds(new Rectangle(x, y, w, h));
                 }
-            } else if (useMaximizedBounds && "windowMaximized".equals(name)) {
+            } else if (!JTattooUtilities.isMac() && useMaximizedBounds && "windowMaximized".equals(name)) {
                 Frame frame = getFrame();
                 if (frame != null) {
                     GraphicsConfiguration gc = frame.getGraphicsConfiguration();
@@ -715,7 +838,7 @@ public class BaseTitlePane extends JComponent {
                         maximize();
                     }
                 }
-            } else if ("windowMoved".equals(name)) {
+            } else if (!JTattooUtilities.isMac() && "windowMoved".equals(name)) {
                 useMaximizedBounds = true;
             }
         }

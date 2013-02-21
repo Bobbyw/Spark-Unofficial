@@ -1,18 +1,38 @@
 /*
- * Copyright 2003 Sun Microsystems, Inc. All rights reserved.
- * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- */
+* Copyright (c) 2002 and later by MH Software-Entwicklung. All Rights Reserved.
+*  
+* JTattoo is multiple licensed. If your are an open source developer you can use
+* it under the terms and conditions of the GNU General Public License version 2.0
+* or later as published by the Free Software Foundation.
+*  
+* see: gpl-2.0.txt
+* 
+* If you pay for a license you will become a registered user who could use the
+* software under the terms and conditions of the GNU Lesser General Public License
+* version 2.0 or later with classpath exception as published by the Free Software
+* Foundation.
+* 
+* see: lgpl-2.0.txt
+* see: classpath-exception.txt
+* 
+* Registered users could also use JTattoo under the terms and conditions of the 
+* Apache License, Version 2.0 as published by the Apache Software Foundation.
+*  
+* see: APACHE-LICENSE-2.0.txt
+*/
+
 package com.jtattoo.plaf;
 
-import java.beans.PropertyChangeEvent;
 import java.awt.*;
-import java.awt.image.*;
-import java.awt.event.*;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.plaf.*;
-import javax.swing.plaf.basic.*;
+import javax.swing.event.MouseInputListener;
+import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.basic.BasicRootPaneUI;
 
 /**
  * This source is a modified copy of javax.swing.plaf.metal.MetalRootPaneUI
@@ -291,7 +311,8 @@ public class BaseRootPaneUI extends BasicRootPaneUI {
      * and sets this value; the default is null, implying a native operating
      * system window title pane.
      *
-     * @param content the <code>JComponent</code> to use for the window title pane.
+     * @param root the <code>JRootPane</code> where to set the title pane
+     * @param titlePane the <code>BaseTitlePane</code> to use for the window title pane.
      */
     public void setTitlePane(JRootPane root, BaseTitlePane titlePane) {
         JLayeredPane layeredPane = root.getLayeredPane();
@@ -339,7 +360,7 @@ public class BaseRootPaneUI extends BasicRootPaneUI {
             if (style != NONE) {
                 installClientDecorations(root);
             }
-            if (window instanceof Frame) {
+            if (!JTattooUtilities.isMac() && (window instanceof Frame)) {
                 Frame frame = (Frame)window;
                 if (frame != null) {
                     GraphicsConfiguration gc = frame.getGraphicsConfiguration();

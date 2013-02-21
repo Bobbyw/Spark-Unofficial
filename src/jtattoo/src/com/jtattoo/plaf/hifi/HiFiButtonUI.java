@@ -1,17 +1,35 @@
 /*
- * Copyright 2005 MH-Software-Entwicklung. All rights reserved.
- * Use is subject to license terms.
- */
+* Copyright (c) 2002 and later by MH Software-Entwicklung. All Rights Reserved.
+*  
+* JTattoo is multiple licensed. If your are an open source developer you can use
+* it under the terms and conditions of the GNU General Public License version 2.0
+* or later as published by the Free Software Foundation.
+*  
+* see: gpl-2.0.txt
+* 
+* If you pay for a license you will become a registered user who could use the
+* software under the terms and conditions of the GNU Lesser General Public License
+* version 2.0 or later with classpath exception as published by the Free Software
+* Foundation.
+* 
+* see: lgpl-2.0.txt
+* see: classpath-exception.txt
+* 
+* Registered users could also use JTattoo under the terms and conditions of the 
+* Apache License, Version 2.0 as published by the Apache Software Foundation.
+*  
+* see: APACHE-LICENSE-2.0.txt
+*/
+ 
 package com.jtattoo.plaf.hifi;
 
-import java.awt.*;
-
-import javax.swing.*;
-import javax.swing.plaf.*;
-
 import com.jtattoo.plaf.*;
+import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
+import javax.swing.*;
+import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.UIResource;
 
 /**
  * @author Michael Hagen
@@ -31,10 +49,9 @@ public class HiFiButtonUI extends BaseButtonUI {
         Graphics2D g2D = (Graphics2D) g;
         Shape savedClip = g.getClip();
         if ((b.getBorder() != null) && b.isBorderPainted() && (b.getBorder() instanceof UIResource)) {
-            Area clipArea = new Area(savedClip);
-            Area rectArea = new Area(new Rectangle2D.Double(1, 1, width - 2, height - 2));
-            rectArea.intersect(clipArea);
-            g2D.setClip(rectArea);
+            Area clipArea = new Area(new Rectangle2D.Double(1, 1, width - 2, height - 2));
+            clipArea.intersect(new Area(savedClip));
+            g2D.setClip(clipArea);
         }
         super.paintBackground(g, b);
         g2D.setClip(savedClip);

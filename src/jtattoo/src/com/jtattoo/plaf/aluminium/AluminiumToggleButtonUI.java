@@ -1,16 +1,35 @@
 /*
- * Copyright 2005 MH-Software-Entwicklung. All rights reserved.
- * Use is subject to license terms.
- */
+* Copyright (c) 2002 and later by MH Software-Entwicklung. All Rights Reserved.
+*  
+* JTattoo is multiple licensed. If your are an open source developer you can use
+* it under the terms and conditions of the GNU General Public License version 2.0
+* or later as published by the Free Software Foundation.
+*  
+* see: gpl-2.0.txt
+* 
+* If you pay for a license you will become a registered user who could use the
+* software under the terms and conditions of the GNU Lesser General Public License
+* version 2.0 or later with classpath exception as published by the Free Software
+* Foundation.
+* 
+* see: lgpl-2.0.txt
+* see: classpath-exception.txt
+* 
+* Registered users could also use JTattoo under the terms and conditions of the 
+* Apache License, Version 2.0 as published by the Apache Software Foundation.
+*  
+* see: APACHE-LICENSE-2.0.txt
+*/
+ 
 package com.jtattoo.plaf.aluminium;
 
-import java.awt.*;
-import java.awt.geom.*;
-import javax.swing.*;
-import javax.swing.plaf.basic.*;
-import javax.swing.plaf.*;
-
 import com.jtattoo.plaf.*;
+import java.awt.*;
+import java.awt.geom.Area;
+import java.awt.geom.RoundRectangle2D;
+import javax.swing.*;
+import javax.swing.plaf.*;
+import javax.swing.plaf.basic.BasicGraphicsUtils;
 
 /**
  * @author Michael Hagen
@@ -38,35 +57,35 @@ public class AluminiumToggleButtonUI extends BaseToggleButtonUI {
         Composite composite = g2D.getComposite();
         Object savedRederingHint = g2D.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
         g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        if (((width < 64) || (height < 16)) && ((b.getText() == null) || b.getText().equals(""))) {
+        if (((width < 64) || (height < 16)) && ((b.getText() == null) || b.getText().length() == 0)) {
             if (model.isSelected()) {
                 Color color = ColorHelper.darker(b.getBackground(), 20);
                 g2D.setColor(color);
                 g2D.fillRect(0, 0, width - 1, height - 1);
                 if (model.isEnabled()) {
-                    g2D.setColor(AluminiumLookAndFeel.getFrameColor());
+                    g2D.setColor(AbstractLookAndFeel.getFrameColor());
                 } else {
-                    g2D.setColor(ColorHelper.brighter(AluminiumLookAndFeel.getFrameColor(), 20));
+                    g2D.setColor(ColorHelper.brighter(AbstractLookAndFeel.getFrameColor(), 20));
                 }
                 g2D.drawRect(0, 0, width - 1, height - 1);
             } else {
                 Color[] colors = null;
                 if (b.getBackground() instanceof ColorUIResource) {
                     if (!model.isEnabled()) {
-                        colors = AluminiumLookAndFeel.getTheme().getDisabledColors();
-                    } else if (model.isRollover()) {
-                        colors = AluminiumLookAndFeel.getTheme().getRolloverColors();
+                        colors = AbstractLookAndFeel.getTheme().getDisabledColors();
+                    } else if (b.isRolloverEnabled() && model.isRollover()) {
+                        colors = AbstractLookAndFeel.getTheme().getRolloverColors();
                     } else {
-                        colors = AluminiumLookAndFeel.getTheme().getButtonColors();
+                        colors = AbstractLookAndFeel.getTheme().getButtonColors();
                     }
                 } else {
                     colors = ColorHelper.createColorArr(ColorHelper.brighter(b.getBackground(), 20), ColorHelper.darker(b.getBackground(), 20), 20);
                 }
                 JTattooUtilities.fillHorGradient(g, colors, 0, 0, width - 1, height - 1);
                 if (model.isEnabled()) {
-                    g2D.setColor(AluminiumLookAndFeel.getFrameColor());
+                    g2D.setColor(AbstractLookAndFeel.getFrameColor());
                 } else {
-                    g2D.setColor(ColorHelper.brighter(AluminiumLookAndFeel.getFrameColor(), 20));
+                    g2D.setColor(ColorHelper.brighter(AbstractLookAndFeel.getFrameColor(), 20));
                 }
                 g2D.drawRect(0, 0, width - 1, height - 1);
                 AlphaComposite alpha = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6f);
@@ -76,7 +95,7 @@ public class AluminiumToggleButtonUI extends BaseToggleButtonUI {
             }
         } else if (model.isPressed() && model.isArmed()) {
             int d = height - 2;
-            Color color = AluminiumLookAndFeel.getTheme().getSelectionBackgroundColor();
+            Color color = AbstractLookAndFeel.getTheme().getSelectionBackgroundColor();
             g2D.setColor(color);
             g2D.fillRoundRect(0, 0, width - 1, height - 1, d, d);
 
@@ -89,9 +108,9 @@ public class AluminiumToggleButtonUI extends BaseToggleButtonUI {
             g2D.fillRoundRect(0, 0, width - 1, height - 1, d, d);
 
             if (model.isEnabled()) {
-                g2D.setColor(AluminiumLookAndFeel.getFrameColor());
+                g2D.setColor(AbstractLookAndFeel.getFrameColor());
             } else {
-                g2D.setColor(ColorHelper.brighter(AluminiumLookAndFeel.getFrameColor(), 20));
+                g2D.setColor(ColorHelper.brighter(AbstractLookAndFeel.getFrameColor(), 20));
             }
             g2D.drawRoundRect(0, 0, width - 1, height - 1, d, d);
         } else {
@@ -100,28 +119,27 @@ public class AluminiumToggleButtonUI extends BaseToggleButtonUI {
             Color[] colors = null;
             if (b.getBackground() instanceof ColorUIResource) {
                 if (!model.isEnabled()) {
-                    colors = AluminiumLookAndFeel.getTheme().getDisabledColors();
-                } else if (model.isRollover()) {
-                    colors = AluminiumLookAndFeel.getTheme().getRolloverColors();
+                    colors = AbstractLookAndFeel.getTheme().getDisabledColors();
+                } else if (b.isRolloverEnabled() && model.isRollover()) {
+                    colors = AbstractLookAndFeel.getTheme().getRolloverColors();
                 } else {
-                    colors = AluminiumLookAndFeel.getTheme().getButtonColors();
+                    colors = AbstractLookAndFeel.getTheme().getButtonColors();
                 }
             } else {
                 colors = ColorHelper.createColorArr(ColorHelper.brighter(b.getBackground(), 20), ColorHelper.darker(b.getBackground(), 20), 20);
             }
 
             Shape savedClip = g.getClip();
-            Area clipArea = new Area(savedClip);
-            Area rectArea = new Area(new RoundRectangle2D.Double(0, 0, width - 1, height - 1, d, d));
-            rectArea.intersect(clipArea);
-            g2D.setClip(rectArea);
+            Area clipArea = new Area(new RoundRectangle2D.Double(0, 0, width - 1, height - 1, d, d));
+            clipArea.intersect(new Area(savedClip));
+            g2D.setClip(clipArea);
             JTattooUtilities.fillHorGradient(g, colors, 0, 0, width, height);
             g2D.setClip(savedClip);
 
             if (model.isEnabled()) {
-                g2D.setColor(AluminiumLookAndFeel.getFrameColor());
+                g2D.setColor(AbstractLookAndFeel.getFrameColor());
             } else {
-                g2D.setColor(ColorHelper.brighter(AluminiumLookAndFeel.getFrameColor(), 20));
+                g2D.setColor(ColorHelper.brighter(AbstractLookAndFeel.getFrameColor(), 20));
             }
             g2D.drawRoundRect(0, 0, width - 1, height - 1, d, d);
 
@@ -139,7 +157,7 @@ public class AluminiumToggleButtonUI extends BaseToggleButtonUI {
         Graphics2D g2D = (Graphics2D) g;
         int width = b.getWidth();
         int height = b.getHeight();
-        if (((width < 64) || (height < 16)) && ((b.getText() == null) || b.getText().equals(""))) {
+        if (((width < 64) || (height < 16)) && ((b.getText() == null) || b.getText().length() == 0)) {
             g.setColor(AbstractLookAndFeel.getFocusColor());
             BasicGraphicsUtils.drawDashedRect(g, 4, 3, width - 8, height - 6);
         } else {

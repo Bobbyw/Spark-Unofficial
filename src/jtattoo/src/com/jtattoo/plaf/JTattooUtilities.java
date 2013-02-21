@@ -1,13 +1,32 @@
 /*
- * Copyright 2005 MH-Software-Entwicklung. All rights reserved.
- * Use is subject to license terms.
- */
+* Copyright (c) 2002 and later by MH Software-Entwicklung. All Rights Reserved.
+*  
+* JTattoo is multiple licensed. If your are an open source developer you can use
+* it under the terms and conditions of the GNU General Public License version 2.0
+* or later as published by the Free Software Foundation.
+*  
+* see: gpl-2.0.txt
+* 
+* If you pay for a license you will become a registered user who could use the
+* software under the terms and conditions of the GNU Lesser General Public License
+* version 2.0 or later with classpath exception as published by the Free Software
+* Foundation.
+* 
+* see: lgpl-2.0.txt
+* see: classpath-exception.txt
+* 
+* Registered users could also use JTattoo under the terms and conditions of the 
+* Apache License, Version 2.0 as published by the Apache Software Foundation.
+*  
+* see: APACHE-LICENSE-2.0.txt
+*/
+
 package com.jtattoo.plaf;
 
-import java.lang.reflect.*;
 import java.awt.*;
+import java.lang.reflect.Method;
 import javax.swing.*;
-import javax.swing.plaf.basic.*;
+import javax.swing.plaf.basic.BasicGraphicsUtils;
 
 /**
  * @author  Michael Hagen
@@ -87,6 +106,9 @@ public class JTattooUtilities {
     }
 
     public static boolean isLeftToRight(Component c) {
+        if (c == null) {
+            return true;
+        }
         return c.getComponentOrientation().isLeftToRight();
     }
 
@@ -142,14 +164,14 @@ public class JTattooUtilities {
     }
 
     public static Container getRootContainer(Component c) {
-        if (c != null) {
-            Container parent = c.getParent();
-            while ((parent != null) && !(parent instanceof JPopupMenu) && !(parent instanceof JInternalFrame) && !(parent instanceof Window) && (parent.getParent() != null)) {
-                parent = parent.getParent();
-            }
-            return parent;
+        if (c == null) {
+            return null;
         }
-        return null;
+        Container parent = c.getParent();
+        while ((parent != null) && !(parent instanceof JPopupMenu) && !(parent instanceof JInternalFrame) && !(parent instanceof Window) && (parent.getParent() != null)) {
+            parent = parent.getParent();
+        }
+        return parent;
     }
 
     public static Dimension getFrameSize(Component c) {
@@ -286,6 +308,7 @@ public class JTattooUtilities {
 
     public static void smoothFillHorGradient(Graphics g, Color[] colors, int x, int y, int w, int h) {
         Graphics2D g2D = (Graphics2D) g;
+        Paint savedPaint = g2D.getPaint();
         int steps = colors.length;
         double dy = (double) h / (double) (steps - 1);
         int y1 = y;
@@ -294,13 +317,14 @@ public class JTattooUtilities {
             if (i == (steps - 1)) {
                 g2D.setPaint(null);
                 g2D.setColor(colors[i]);
-                g.fillRect(x, y1, w, y + h - y1);
+                g2D.fillRect(x, y1, w, y + h - y1);
             } else {
                 g2D.setPaint(new GradientPaint(0, y1, colors[i], 0, y2, colors[i + 1]));
-                g.fillRect(x, y1, w, y2 - y1);
+                g2D.fillRect(x, y1, w, y2 - y1);
             }
             y1 = y2;
         }
+        g2D.setPaint(savedPaint);
     }
 
     public static void fillInverseHorGradient(Graphics g, Color[] colors, int x, int y, int w, int h) {
@@ -326,6 +350,7 @@ public class JTattooUtilities {
 
     public static void smoothFillInverseHorGradient(Graphics g, Color[] colors, int x, int y, int w, int h) {
         Graphics2D g2D = (Graphics2D) g;
+        Paint savedPaint = g2D.getPaint();
         int steps = colors.length;
         double dy = (double) h / (double) steps;
         int y1 = y;
@@ -342,6 +367,7 @@ public class JTattooUtilities {
             }
             y1 = y2;
         }
+        g2D.setPaint(savedPaint);
     }
 
     public static void fillVerGradient(Graphics g, Color[] colors, int x, int y, int w, int h) {
@@ -375,6 +401,31 @@ public class JTattooUtilities {
             x1 = x2;
         }
     }
+
+    public static void fillComponent(Graphics g, Component c, Icon texture) {
+        int x = 0;
+        int y = 0;
+        int w = c.getWidth();
+        int h = c.getHeight();
+        if (texture != null) {
+            int tw = texture.getIconWidth();
+            int th = texture.getIconHeight();
+            Point p = JTattooUtilities.getRelLocation(c);
+            y = -p.y;
+            while (y < h) {
+                x = -p.x;
+                while (x < w) {
+                    texture.paintIcon(c, g, x, y);
+                    x += tw;
+                }
+                y += th;
+            }
+        } else {
+            g.setColor(c.getBackground());
+            g.fillRect(x, y, w, h);
+        }
+    }
+
     //-------------------------------------------------------------------------------------------
 
     public static void drawBorder(Graphics g, Color c, int x, int y, int w, int h) {
@@ -389,7 +440,7 @@ public class JTattooUtilities {
         g.drawLine(x, y, x2 - 1, y);
         g.drawLine(x, y + 1, x, y2);
         g.setColor(c2);
-        g.drawLine(x + 1, y2, x2 - 1, y2);
+        g.drawLine(x, y2, x2 - 1, y2);
         g.drawLine(x2, y, x2, y2);
     }
 

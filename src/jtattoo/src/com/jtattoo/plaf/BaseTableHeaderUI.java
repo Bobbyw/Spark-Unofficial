@@ -1,33 +1,36 @@
 /*
- * Copyright 2011 MH-Software-Entwicklung. All rights reserved.
- * Use is subject to license terms.
- */
+* Copyright (c) 2002 and later by MH Software-Entwicklung. All Rights Reserved.
+*  
+* JTattoo is multiple licensed. If your are an open source developer you can use
+* it under the terms and conditions of the GNU General Public License version 2.0
+* or later as published by the Free Software Foundation.
+*  
+* see: gpl-2.0.txt
+* 
+* If you pay for a license you will become a registered user who could use the
+* software under the terms and conditions of the GNU Lesser General Public License
+* version 2.0 or later with classpath exception as published by the Free Software
+* Foundation.
+* 
+* see: lgpl-2.0.txt
+* see: classpath-exception.txt
+* 
+* Registered users could also use JTattoo under the terms and conditions of the 
+* Apache License, Version 2.0 as published by the Apache Software Foundation.
+*  
+* see: APACHE-LICENSE-2.0.txt
+*/
+
 package com.jtattoo.plaf;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.awt.*;
+import java.awt.event.*;
 import java.util.Enumeration;
 import java.util.List;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.RowSorter;
-import javax.swing.SortOrder;
-import javax.swing.SwingConstants;
-import javax.swing.UIManager;
+import javax.swing.*;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicTableHeaderUI;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.*;
 
 /**
  *
@@ -46,16 +49,20 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
 
     public void installUI(JComponent c) {
         super.installUI(c);
-        originalHeaderRenderer = header.getDefaultRenderer();
-        if ((originalHeaderRenderer != null)
-                && "sun.swing.table.DefaultTableCellHeaderRenderer".equals(originalHeaderRenderer.getClass().getName())) {
-            header.setDefaultRenderer(new BaseDefaultHeaderRenderer());
+        if ((header != null) && header.getTable() != null) {
+            originalHeaderRenderer = header.getDefaultRenderer();
+            if ((originalHeaderRenderer != null)
+                    && "sun.swing.table.DefaultTableCellHeaderRenderer".equals(originalHeaderRenderer.getClass().getName())) {
+                header.setDefaultRenderer(new BaseDefaultHeaderRenderer());
+            }
         }
     }
 
     public void uninstallUI(JComponent c) {
-        if (header.getDefaultRenderer() instanceof BaseDefaultHeaderRenderer) {
-            header.setDefaultRenderer(originalHeaderRenderer);
+        if ((header != null) && (header.getTable() != null)) {
+            if (header.getDefaultRenderer() instanceof BaseDefaultHeaderRenderer) {
+                header.setDefaultRenderer(originalHeaderRenderer);
+            }
         }
         super.uninstallUI(c);
     }
@@ -65,11 +72,15 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
         myMouseAdapter = new MouseAdapter() {
 
             public void mouseReleased(MouseEvent e) {
+                if ((header == null) || (header.getTable() == null)) {
+                    return;
+                }
+                boolean rolloverEnabled = Boolean.TRUE.equals(header.getClientProperty("rolloverEnabled"));
                 boolean sortingAllowed = false;
                 if (JTattooUtilities.getJavaVersion() >= 1.6) {
                     sortingAllowed = header.getTable().getRowSorter() != null;
                 }
-                if (sortingAllowed || header.getReorderingAllowed()) {
+                if (rolloverEnabled || sortingAllowed || header.getReorderingAllowed()) {
                     if (header.getBounds().contains(e.getPoint())) {
                         int oldRolloverCol = rolloverCol;
                         rolloverCol = header.getColumnModel().getColumnIndexAtX(e.getX());
@@ -83,11 +94,15 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
             }
 
             public void mouseEntered(MouseEvent e) {
+                if ((header == null) || (header.getTable() == null)) {
+                    return;
+                }
+                boolean rolloverEnabled = Boolean.TRUE.equals(header.getClientProperty("rolloverEnabled"));
                 boolean sortingAllowed = false;
                 if (JTattooUtilities.getJavaVersion() >= 1.6) {
                     sortingAllowed = header.getTable().getRowSorter() != null;
                 }
-                if (sortingAllowed || header.getReorderingAllowed()) {
+                if (rolloverEnabled || sortingAllowed || header.getReorderingAllowed()) {
                     int oldRolloverCol = rolloverCol;
                     rolloverCol = header.getColumnModel().getColumnIndexAtX(e.getX());
                     updateRolloverColumn(oldRolloverCol, rolloverCol);
@@ -95,11 +110,15 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
             }
 
             public void mouseExited(MouseEvent e) {
+                if ((header == null) || (header.getTable() == null)) {
+                    return;
+                }
+                boolean rolloverEnabled = Boolean.TRUE.equals(header.getClientProperty("rolloverEnabled"));
                 boolean sortingAllowed = false;
                 if (JTattooUtilities.getJavaVersion() >= 1.6) {
                     sortingAllowed = header.getTable().getRowSorter() != null;
                 }
-                if (sortingAllowed || header.getReorderingAllowed()) {
+                if (rolloverEnabled || sortingAllowed || header.getReorderingAllowed()) {
                     int oldRolloverCol = rolloverCol;
                     rolloverCol = -1;
                     updateRolloverColumn(oldRolloverCol, rolloverCol);
@@ -109,11 +128,15 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
         myMouseMotionAdapter = new MouseMotionAdapter() {
 
             public void mouseMoved(MouseEvent e) {
+                if ((header == null) || (header.getTable() == null)) {
+                    return;
+                }
+                boolean rolloverEnabled = Boolean.TRUE.equals(header.getClientProperty("rolloverEnabled"));
                 boolean sortingAllowed = false;
                 if (JTattooUtilities.getJavaVersion() >= 1.6) {
                     sortingAllowed = header.getTable().getRowSorter() != null;
                 }
-                if (sortingAllowed || header.getReorderingAllowed()) {
+                if (rolloverEnabled || sortingAllowed || header.getReorderingAllowed()) {
                     if (header.getDraggedColumn() == null) {
                         int oldRolloverCol = rolloverCol;
                         rolloverCol = header.getColumnModel().getColumnIndexAtX(e.getX());
@@ -123,11 +146,15 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
             }
 
             public void mouseDragged(MouseEvent e) {
+                if ((header == null) || (header.getTable() == null)) {
+                    return;
+                }
+                boolean rolloverEnabled = Boolean.TRUE.equals(header.getClientProperty("rolloverEnabled"));
                 boolean sortingAllowed = false;
                 if (JTattooUtilities.getJavaVersion() >= 1.6) {
                     sortingAllowed = header.getTable().getRowSorter() != null;
                 }
-                if (sortingAllowed || header.getReorderingAllowed()) {
+                if (rolloverEnabled || sortingAllowed || header.getReorderingAllowed()) {
                     if (header.getDraggedColumn() != null && header.getDraggedColumn().getIdentifier() != null) {
                         rolloverCol = header.getColumnModel().getColumnIndex(header.getDraggedColumn().getIdentifier());
                     } else if (header.getResizingColumn() != null) {
@@ -155,6 +182,9 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
     }
 
     protected Component getHeaderRenderer(int col) {
+        if ((header == null) || (header.getTable() == null)) {
+            return null;
+        }
         TableColumn tabCol = header.getColumnModel().getColumn(col);
         TableCellRenderer renderer = tabCol.getHeaderRenderer();
         if (renderer == null) {
@@ -164,6 +194,9 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
     }
 
     private int getHeaderHeight() {
+        if ((header == null) || (header.getTable() == null)) {
+            return 0;
+        }
         int height = 0;
 	boolean accomodatedDefault = false;
         TableColumnModel columnModel = header.getColumnModel();
@@ -202,6 +235,9 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
      * preferred widths of each column (plus inter-cell spacing).
      */
     public Dimension getPreferredSize(JComponent c) {
+        if ((header == null) || (header.getTable() == null)) {
+            return new Dimension(0, 0);
+        }
         long width = 0;
         Enumeration enumeration = header.getColumnModel().getColumns();
         while (enumeration.hasMoreElements()) {
@@ -215,6 +251,9 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
     }
 
     protected void updateRolloverColumn(int oldColumn, int newColumn) {
+        if ((header == null) || (header.getTable() == null)) {
+            return;
+        }
         header.repaint(header.getHeaderRect(oldColumn));
         header.repaint(header.getHeaderRect(newColumn));
     }
@@ -224,11 +263,11 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
     }
 
     public void paint(Graphics g, JComponent c) {
-        if (header.getColumnModel().getColumnCount() <= 0) {
+        if ((header == null) || (header.getTable() == null) || header.getColumnModel().getColumnCount() <= 0) {
             return;
         }
-        boolean ltr = header.getComponentOrientation().isLeftToRight();
 
+        boolean ltr = header.getComponentOrientation().isLeftToRight();
         Rectangle clip = g.getClipBounds();
         Point left = clip.getLocation();
         Point right = new Point(clip.x + clip.width - 1, clip.y);
@@ -296,9 +335,9 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
         int y = cellRect.y;
         int w = cellRect.width;
         int h = cellRect.height;
-        if (col == rolloverCol && component.isEnabled()) {
+        if ((col == rolloverCol) && (component != null) && component.isEnabled()) {
             JTattooUtilities.fillHorGradient(g, AbstractLookAndFeel.getTheme().getRolloverColors(), x, y, w, h);
-        } else if (JTattooUtilities.isFrameActive(header)) {
+        } else if (drawAllwaysActive() || JTattooUtilities.isFrameActive(header)) {
             JTattooUtilities.fillHorGradient(g, AbstractLookAndFeel.getTheme().getColHeaderColors(), x, y, w, h);
         } else {
             JTattooUtilities.fillHorGradient(g, AbstractLookAndFeel.getTheme().getInActiveColors(), x, y, w, h);
@@ -306,6 +345,9 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
     }
 
     protected void paintCell(Graphics g, Rectangle cellRect, int col) {
+        if ((header == null) || (header.getTable() == null)) {
+            return;
+        }
         Component component = getHeaderRenderer(col);
         if (!(component instanceof BaseDefaultHeaderRenderer)) {
             paintBackground(g, cellRect, col);
@@ -314,6 +356,9 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
     }
 
     private int viewIndexForColumn(TableColumn aColumn) {
+        if ((header == null) || (header.getTable() == null)) {
+            return -1;
+        }
         TableColumnModel cm = header.getColumnModel();
         for (int column = 0; column < cm.getColumnCount(); column++) {
             if (cm.getColumn(column) == aColumn) {
@@ -357,7 +402,7 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
             setHorizontalAlignment(JLabel.CENTER);
             setHorizontalTextPosition(SwingConstants.LEADING);
             setBorder(UIManager.getBorder("TableHeader.cellBorder"));
-            if (JTattooUtilities.getJavaVersion() >= 1.6) {
+            if ((JTattooUtilities.getJavaVersion() >= 1.6) && (UIManager.getLookAndFeel() instanceof AbstractLookAndFeel)) {
                 RowSorter rowSorter = table == null ? null : table.getRowSorter();
                 List keyList = rowSorter == null ? null : rowSorter.getSortKeys();
                 if ((keyList != null) && (keyList.size() > 0)) {
@@ -377,10 +422,10 @@ public class BaseTableHeaderUI extends BasicTableHeaderUI {
 
         protected void paintBackground(Graphics g) {
             int draggedColumn = -1;
-            if (header.getDraggedColumn() != null) {
+            if ((header != null) && (header.getTable() != null) && header.getDraggedColumn() != null) {
                 draggedColumn = header.getColumnModel().getColumnIndex(header.getDraggedColumn().getIdentifier());
             }
-            if (table.isEnabled() && (col == rolloverCol || col == draggedColumn)) {
+            if ((table != null) && table.isEnabled() && (col == rolloverCol || col == draggedColumn)) {
                 JTattooUtilities.fillHorGradient(g, AbstractLookAndFeel.getTheme().getRolloverColors(), 0, 0, getWidth(), getHeight());
                 if (drawRolloverBar()) {
                     g.setColor(AbstractLookAndFeel.getFocusColor());

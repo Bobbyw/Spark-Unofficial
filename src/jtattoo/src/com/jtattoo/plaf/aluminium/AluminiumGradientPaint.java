@@ -1,13 +1,33 @@
 /*
- * Copyright 2006 MH-Software-Entwicklung. All rights reserved.
- * Use is subject to license terms.
- */
+* Copyright (c) 2002 and later by MH Software-Entwicklung. All Rights Reserved.
+*  
+* JTattoo is multiple licensed. If your are an open source developer you can use
+* it under the terms and conditions of the GNU General Public License version 2.0
+* or later as published by the Free Software Foundation.
+*  
+* see: gpl-2.0.txt
+* 
+* If you pay for a license you will become a registered user who could use the
+* software under the terms and conditions of the GNU Lesser General Public License
+* version 2.0 or later with classpath exception as published by the Free Software
+* Foundation.
+* 
+* see: lgpl-2.0.txt
+* see: classpath-exception.txt
+* 
+* Registered users could also use JTattoo under the terms and conditions of the 
+* Apache License, Version 2.0 as published by the Apache Software Foundation.
+*  
+* see: APACHE-LICENSE-2.0.txt
+*/
+ 
 package com.jtattoo.plaf.aluminium;
 
-import java.util.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
-import java.awt.geom.*;
+import java.util.HashMap;
 
 /**
  *
@@ -193,13 +213,13 @@ public class AluminiumGradientPaint implements Paint {
             26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 28, 28, 29, 29, 29, 29,
             28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 29, 29, 28, 28,
             28, 27, 27, 27, 27, 27, 27, 27, 27, 27, 28, 28, 28, 28, 28, 28, 28, 28, 27, 27, 27, 27, 27, 27, 27, 27, 26, 26, 26, 26, 26,
-            26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 25, 25, 26, 26, 26, 26, 26, 26, 25, 25, 25, 25,};
+            26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 25, 25, 26, 26, 26, 26, 26, 26, 25, 25, 25, 25};
         private ColorModel colorModel = null;
         private Rectangle rect = null;
         private Point offset = null;
         private Dimension size = null;
         private int[] gradientSample = null;
-        private Hashtable rasterCache = new Hashtable();
+        private HashMap rasterCache = new HashMap();
 
         public GradientPaintContext(ColorModel cm, Rectangle r, Point o, Dimension s) {
             colorModel = cm;
