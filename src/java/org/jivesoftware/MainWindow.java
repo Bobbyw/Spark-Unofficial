@@ -74,6 +74,7 @@ import org.jivesoftware.sparkimpl.settings.local.LocalPreferences;
 import org.jivesoftware.sparkimpl.settings.local.SettingsManager;
 import org.jivesoftware.sparkimpl.updater.CheckUpdates;
 
+
 /**
  * The <code>MainWindow</code> class acts as both the DockableHolder and the proxy
  * to the Workspace in Spark.
@@ -751,13 +752,63 @@ public final class MainWindow extends ChatFrame implements ActionListener {
     			Default.getString(Default.BUILD_DATE);
     	String application_Info1 = Default.getString(Default.APPLICATION_INFO1);
     	String application_Info2 = Default.getString(Default.APPLICATION_INFO2);
+    	String application_href = Default.getString(Default.APPLICATION_HREF);
+    	String application_href_txt = Default.getString(Default.APPLICATION_HREF_TXT);
     	if (!(application_Info1.equalsIgnoreCase(""))) {
     		aboutBoxText += "\n" + application_Info1;
     	}
     	if (!(application_Info2.equalsIgnoreCase(""))) {
     		aboutBoxText += "\n" + application_Info2;
     	}
-        JOptionPane.showMessageDialog(SparkManager.getMainWindow(), aboutBoxText,
+    	if (!(application_href.equalsIgnoreCase(""))) {
+    		application_href = "<html><a href=\"" + application_href + "\">" + 
+    				application_href_txt + "</a></html>";
+    		aboutBoxText += "\n" + application_href;
+    	}
+    	
+    	// for copying style
+        javax.swing.JLabel label = new javax.swing.JLabel();
+        Font font = label.getFont();
+    	
+    	// create some css from the label's font
+        StringBuffer style = new StringBuffer("font-family:" + font.getFamily() + ";");
+        style.append("font-weight:" + (font.isBold() ? "bold" : "normal") + ";");
+        style.append("font-size:" + font.getSize() + "pt;");
+    	
+        // html content
+        javax.swing.JEditorPane ep = new javax.swing.JEditorPane
+        	(
+        	"text/html", 
+        	"<html>"
+        	+ "<body style=\"" + style + "\">"
+        	+ "" + aboutBoxText + ""
+        	+ ""
+        	+ ""
+        	+ "<a href=\"http://www.igniterealtime.org/\">www.igniterealtime.org</a>"
+            + "</body>"
+            + "</html>"
+            );
+    	
+        // handle link events
+        ep.addHyperlinkListener(new javax.swing.event.HyperlinkListener()
+        {
+            @Override
+            public void hyperlinkUpdate(javax.swing.event.HyperlinkEvent e)
+            {
+                if (e.getEventType().equals(javax.swing.event.HyperlinkEvent.EventType.ACTIVATED)) {
+                	// sun.java2d.loops.ProcessPath.ProcessHandler.launchUrl(e.getURL().toString()); 
+                	// roll your own link launcher or use Desktop if J6+
+                }
+                
+            }
+        });
+        ep.setEditable(false);
+        ep.setBackground(label.getBackground());
+        
+    	
+//    	JXHyperlink href = new JXHyperlink(new ClickLinkAction());
+    	
+        JOptionPane.showMessageDialog(SparkManager.getMainWindow(), ep,
             Res.getString("title.about"), JOptionPane.INFORMATION_MESSAGE, SparkRes.getImageIcon(SparkRes.MAIN_IMAGE));
     }
 
@@ -838,4 +889,14 @@ public final class MainWindow extends ChatFrame implements ActionListener {
         }
         return this.splitPane;
     }
+}
+
+class ClickLinkAction extends AbstractAction {
+	public ClickLinkAction() {
+		super.putValue(Action.NAME, Default.getString(Default.APPLICATION_HREF));
+		super.putValue(Action.SHORT_DESCRIPTION, Default.getString(Default.APPLICATION_HREF_TXT));
+	}
+	public void actionPerformed(ActionEvent e) {
+		System.out.println("Clicked HREF!");
+	}
 }

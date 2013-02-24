@@ -46,6 +46,8 @@ public class Default {
     public static final String BUILD_DATE = "BUILD_DATE";
     public static final String APPLICATION_INFO1 = "APPLICATION_INFO1";
     public static final String APPLICATION_INFO2 = "APPLICATION_INFO2";
+    public static final String APPLICATION_HREF = "APPLICATION_HREF";
+    public static final String APPLICATION_HREF_TXT = "APPLICATION_HREF_TXT";
     public static final String SHORT_NAME = "SHORT_NAME";
     public static final String APPLICATION_VERSION = "APPLICATION_VERSION";
     public static final String LOGIN_DIALOG_BACKGROUND_IMAGE = "LOGIN_DIALOG_BACKGROUND_IMAGE";
