@@ -128,34 +128,35 @@ public class ThemePanel extends JPanel {
 
 	String[] nonSystemLookAndFeels = {
 		//JTattoo
-		//"com.jtattoo.plaf.acryl.AcrylLookAndFeel",
+		"com.jtattoo.plaf.acryl.AcrylLookAndFeel", // was commented out
 		"com.jtattoo.plaf.aero.AeroLookAndFeel",
 		"com.jtattoo.plaf.aluminium.AluminiumLookAndFeel",
-		//"com.jtattoo.plaf.bernstein.BernsteinLookAndFeel",
+		"com.jtattoo.plaf.bernstein.BernsteinLookAndFeel", // was commented out
 		"com.jtattoo.plaf.fast.FastLookAndFeel",
-		//"com.jtattoo.plaf.graphite.GraphiteLookAndFeel",
-		//"com.jtattoo.plaf.hifi.HiFiLookAndFeel",
+		"com.jtattoo.plaf.graphite.GraphiteLookAndFeel", // was commented out
+		"com.jtattoo.plaf.hifi.HiFiLookAndFeel", // was commented out
 		"com.jtattoo.plaf.luna.LunaLookAndFeel",
 		"com.jtattoo.plaf.mcwin.McWinLookAndFeel",
 		"com.jtattoo.plaf.mint.MintLookAndFeel",
-		//"com.jtattoo.plaf.noire.NoireLookAndFeel",
+		"com.jtattoo.plaf.noire.NoireLookAndFeel", // was commented out
 		"com.jtattoo.plaf.smart.SmartLookAndFeel",
+		// added Texture LaF
 		"com.jtattoo.plaf.texture.TextureLookAndFeel",
 		//Substance
-		//"org.jvnet.substance.skin.SubstanceAutumnLookAndFeel",
+		"org.jvnet.substance.skin.SubstanceAutumnLookAndFeel", // was commented out
 		"org.jvnet.substance.skin.SubstanceBusinessBlackSteelLookAndFeel",
 		"org.jvnet.substance.skin.SubstanceBusinessBlueSteelLookAndFeel",
 		"org.jvnet.substance.skin.SubstanceBusinessLookAndFeel",
-		//"org.jvnet.substance.skin.SubstanceChallengerDeepLookAndFeel",
+		"org.jvnet.substance.skin.SubstanceChallengerDeepLookAndFeel", // was commented out
 		"org.jvnet.substance.skin.SubstanceCremeCoffeeLookAndFeel",
 		"org.jvnet.substance.skin.SubstanceCremeLookAndFeel",
 		"org.jvnet.substance.skin.SubstanceDustCoffeeLookAndFeel",
 		"org.jvnet.substance.skin.SubstanceDustLookAndFeel",
-		//"org.jvnet.substance.skin.SubstanceEmeraldDuskLookAndFeel",
+		"org.jvnet.substance.skin.SubstanceEmeraldDuskLookAndFeel", // was commented out
 		"org.jvnet.substance.api.skin.SubstanceGeminiLookAndFeel",
 		"org.jvnet.substance.api.skin.SubstanceGraphiteAquaLookAndFeel",
-		//"org.jvnet.substance.skin.SubstanceMagmaLookAndFeel",
-		//"org.jvnet.substance.api.skin.SubstanceMagellanLookAndFeel",
+		"org.jvnet.substance.skin.SubstanceMagmaLookAndFeel",
+		"org.jvnet.substance.api.skin.SubstanceMagellanLookAndFeel", // was commented out
 		"org.jvnet.substance.skin.SubstanceMistAquaLookAndFeel",
 		"org.jvnet.substance.skin.SubstanceMistSilverLookAndFeel",
 		"org.jvnet.substance.skin.SubstanceModerateLookAndFeel",
@@ -165,9 +166,9 @@ public class ThemePanel extends JPanel {
 		"org.jvnet.substance.skin.SubstanceOfficeSilver2007LookAndFeel",
 		"org.jvnet.substance.skin.SubstanceRavenGraphiteGlassLookAndFeel",
 		"org.jvnet.substance.skin.SubstanceRavenGraphiteLookAndFeel",
-		//"org.jvnet.substance.skin.SubstanceRavenLookAndFeel",
+		"org.jvnet.substance.skin.SubstanceRavenLookAndFeel", // was commented out
 		"org.jvnet.substance.skin.SubstanceSaharaLookAndFeel",
-		//"org.jvnet.substance.skin.SubstanceTwilightLookAndFeel"
+		"org.jvnet.substance.skin.SubstanceTwilightLookAndFeel" // was commented out
 		};
 
 	for (String s : nonSystemLookAndFeels) {

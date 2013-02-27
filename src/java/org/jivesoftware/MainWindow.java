@@ -49,6 +49,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 
+import org.apache.commons.httpclient.URIException;
 import org.jivesoftware.launcher.Startup;
 import org.jivesoftware.resource.Default;
 import org.jivesoftware.resource.Res;
@@ -748,22 +749,22 @@ public final class MainWindow extends ChatFrame implements ActionListener {
      */
     private static void showAboutBox() {
     	String aboutBoxText = 
-    			Default.getString(Default.APPLICATION_NAME) + " " + JiveInfo.getVersion() + "\n" + 
-    			Default.getString(Default.BUILD_DATE);
+    			Default.getString(Default.APPLICATION_NAME) + " " + JiveInfo.getVersion() + "<br>" + 
+    			"Build Date: " + Default.getString(Default.BUILD_DATE);
     	String application_Info1 = Default.getString(Default.APPLICATION_INFO1);
     	String application_Info2 = Default.getString(Default.APPLICATION_INFO2);
     	String application_href = Default.getString(Default.APPLICATION_HREF);
     	String application_href_txt = Default.getString(Default.APPLICATION_HREF_TXT);
     	if (!(application_Info1.equalsIgnoreCase(""))) {
-    		aboutBoxText += "\n" + application_Info1;
+    		aboutBoxText += "<br>" + application_Info1;
     	}
     	if (!(application_Info2.equalsIgnoreCase(""))) {
-    		aboutBoxText += "\n" + application_Info2;
+    		aboutBoxText += "<br>" + application_Info2;
     	}
     	if (!(application_href.equalsIgnoreCase(""))) {
     		application_href = "<html><a href=\"" + application_href + "\">" + 
     				application_href_txt + "</a></html>";
-    		aboutBoxText += "\n" + application_href;
+    		aboutBoxText += "<br>" + application_href;
     	}
     	
     	// for copying style
@@ -781,10 +782,11 @@ public final class MainWindow extends ChatFrame implements ActionListener {
         	"text/html", 
         	"<html>"
         	+ "<body style=\"" + style + "\">"
-        	+ "" + aboutBoxText + ""
+        	+ "" + aboutBoxText + "" + "<br />"
         	+ ""
         	+ ""
-        	+ "<a href=\"http://www.igniterealtime.org/\">www.igniterealtime.org</a>"
+        	+ "<a href=\""+ Default.getString(Default.APPLICATION_HREF) 
+        	+ "\">" + Default.getString(Default.APPLICATION_HREF_TXT) + "</a>"
             + "</body>"
             + "</html>"
             );
@@ -796,8 +798,14 @@ public final class MainWindow extends ChatFrame implements ActionListener {
             public void hyperlinkUpdate(javax.swing.event.HyperlinkEvent e)
             {
                 if (e.getEventType().equals(javax.swing.event.HyperlinkEvent.EventType.ACTIVATED)) {
-                	// sun.java2d.loops.ProcessPath.ProcessHandler.launchUrl(e.getURL().toString()); 
-                	// roll your own link launcher or use Desktop if J6+
+                	try {
+                	java.awt.Desktop.getDesktop().browse(
+                			new java.net.URI(Default.getString(Default.APPLICATION_HREF)));
+                	} catch (java.net.URISyntaxException uriEx) {
+                		uriEx.printStackTrace();
+                	} catch (IOException ioEx) {
+                		ioEx.printStackTrace();
+                	}
                 }
                 
             }
