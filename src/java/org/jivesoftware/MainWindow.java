@@ -748,23 +748,49 @@ public final class MainWindow extends ChatFrame implements ActionListener {
      * Displays the About Box for Spark.
      */
     private static void showAboutBox() {
-    	String aboutBoxText = 
-    			Default.getString(Default.APPLICATION_NAME) + " " + JiveInfo.getVersion() + "<br>" + 
-    			"Build Date: " + Default.getString(Default.BUILD_DATE);
+    	
     	String application_Info1 = Default.getString(Default.APPLICATION_INFO1);
     	String application_Info2 = Default.getString(Default.APPLICATION_INFO2);
+    	String application_License = Default.getString(Default.APPLICATION_LICENSE);
+    	String application_License_HREF = Default.getString(Default.APPLICATION_LICENSE_HREF);
+    	String application_License_HREF_TXT = Default.getString(Default.APPLICATION_LICENSE_HREF_TXT);
+    	String application_Info3 = Default.getString(Default.APPLICATION_INFO3);
     	String application_href = Default.getString(Default.APPLICATION_HREF);
     	String application_href_txt = Default.getString(Default.APPLICATION_HREF_TXT);
+    	
+    	String aboutBoxText = 
+    			Default.getString(Default.APPLICATION_NAME) + " " + JiveInfo.getVersion()
+    			+ "<br>" 
+    			+ "Build Date: " + Default.getString(Default.BUILD_DATE);
+    	
     	if (!(application_Info1.equalsIgnoreCase(""))) {
-    		aboutBoxText += "<br>" + application_Info1;
+    		aboutBoxText = aboutBoxText.concat(
+    			"<br>"
+    			+ application_Info1);
     	}
     	if (!(application_Info2.equalsIgnoreCase(""))) {
-    		aboutBoxText += "<br>" + application_Info2;
+    		aboutBoxText = aboutBoxText.concat(
+    			"<br>"
+    			+ application_Info2
+    			);
+    	}
+       	if (!(application_License.equalsIgnoreCase(""))) {
+    		aboutBoxText = aboutBoxText.concat(
+    			"<br>"
+    			+ application_License
+    			);
+    	}
+    	if (!(application_License_HREF.equalsIgnoreCase(""))) {
+    		aboutBoxText = aboutBoxText.concat(
+    			"<br>"
+    			+ "<a href=\"" + application_License_HREF + "\">" + application_License_HREF_TXT + "</a>"
+    			);
     	}
     	if (!(application_href.equalsIgnoreCase(""))) {
-    		application_href = "<html><a href=\"" + application_href + "\">" + 
-    				application_href_txt + "</a></html>";
-    		aboutBoxText += "<br>" + application_href;
+    		aboutBoxText = aboutBoxText.concat(
+    			"<br>"
+    			+ "<a href=\"" + application_href + "\">" + application_href_txt + "</a>"
+    			);
     	}
     	
     	// for copying style
@@ -782,11 +808,7 @@ public final class MainWindow extends ChatFrame implements ActionListener {
         	"text/html", 
         	"<html>"
         	+ "<body style=\"" + style + "\">"
-        	+ "" + aboutBoxText + "" + "<br />"
-        	+ ""
-        	+ ""
-        	+ "<a href=\""+ Default.getString(Default.APPLICATION_HREF) 
-        	+ "\">" + Default.getString(Default.APPLICATION_HREF_TXT) + "</a>"
+        	+ "" + aboutBoxText
             + "</body>"
             + "</html>"
             );
@@ -799,6 +821,8 @@ public final class MainWindow extends ChatFrame implements ActionListener {
             {
                 if (e.getEventType().equals(javax.swing.event.HyperlinkEvent.EventType.ACTIVATED)) {
                 	try {
+                    	java.awt.Desktop.getDesktop().browse(
+                    			new java.net.URI(Default.getString(Default.APPLICATION_LICENSE_HREF)));
                 	java.awt.Desktop.getDesktop().browse(
                 			new java.net.URI(Default.getString(Default.APPLICATION_HREF)));
                 	} catch (java.net.URISyntaxException uriEx) {

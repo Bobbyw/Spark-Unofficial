@@ -46,6 +46,10 @@ public class Default {
     public static final String BUILD_DATE = "BUILD_DATE";
     public static final String APPLICATION_INFO1 = "APPLICATION_INFO1";
     public static final String APPLICATION_INFO2 = "APPLICATION_INFO2";
+    public static final String APPLICATION_LICENSE = "APPLICATION_LICENSE";
+    public static final String APPLICATION_LICENSE_HREF = "APPLICATION_LICENSE_HREF";
+    public static final String APPLICATION_LICENSE_HREF_TXT = "APPLICATION_LICENSE_HREF_TXT";
+    public static final String APPLICATION_INFO3 = "APPLICATION_INFO3";
     public static final String APPLICATION_HREF = "APPLICATION_HREF";
     public static final String APPLICATION_HREF_TXT = "APPLICATION_HREF_TXT";
     public static final String SHORT_NAME = "SHORT_NAME";
