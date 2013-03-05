@@ -22,6 +22,7 @@ package org.jivesoftware;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,6 +31,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TimerTask;
@@ -39,7 +42,9 @@ import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -48,12 +53,14 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
-import org.apache.commons.httpclient.URIException;
 import org.jivesoftware.launcher.Startup;
 import org.jivesoftware.resource.Default;
 import org.jivesoftware.resource.Res;
 import org.jivesoftware.resource.SparkRes;
+import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.spark.SparkManager;
@@ -743,12 +750,16 @@ public final class MainWindow extends ChatFrame implements ActionListener {
             Log.warning("Error updating.", e);
         }
     }
-
+    
     /**
-     * Displays the About Box for Spark.
+     * Gets and Formats the About Box Text for Spark.
+     * @return A JEditorPane that is fully formated
+     * 		with all text for the About Box.
      */
-    private static void showAboutBox() {
+    private static JEditorPane getAboutBoxText() {
     	
+    	// Get values from default.properties file
+    	String smack_Version = Default.getString(Default.SMACK_VERSION);
     	String application_Info1 = Default.getString(Default.APPLICATION_INFO1);
     	String application_Info2 = Default.getString(Default.APPLICATION_INFO2);
     	String application_License = Default.getString(Default.APPLICATION_LICENSE);
@@ -758,43 +769,54 @@ public final class MainWindow extends ChatFrame implements ActionListener {
     	String application_href = Default.getString(Default.APPLICATION_HREF);
     	String application_href_txt = Default.getString(Default.APPLICATION_HREF_TXT);
     	
-    	String aboutBoxText = 
+    	String aboutBoxText = // start construction of About Box text
     			Default.getString(Default.APPLICATION_NAME) + " " + JiveInfo.getVersion()
     			+ "<br>" 
     			+ "Build Date: " + Default.getString(Default.BUILD_DATE);
-    	
-    	if (!(application_Info1.equalsIgnoreCase(""))) {
+    	if (smack_Version.equalsIgnoreCase("")) { // Add Smack Version # if is empty
+    		aboutBoxText = aboutBoxText.concat(
+    			"<br>"
+    			+ "Smack Version: " + SmackConfiguration.getVersion()
+    			);
+    	}
+    	if (!(application_Info1.equalsIgnoreCase(""))) { // Add APPLICATION_INFO1 if not empty
     		aboutBoxText = aboutBoxText.concat(
     			"<br>"
     			+ application_Info1);
     	}
-    	if (!(application_Info2.equalsIgnoreCase(""))) {
+    	if (!(application_Info2.equalsIgnoreCase(""))) { // Add APPLICATION_INFO2 if not empty
     		aboutBoxText = aboutBoxText.concat(
     			"<br>"
     			+ application_Info2
     			);
     	}
-       	if (!(application_License.equalsIgnoreCase(""))) {
+       	if (!(application_License.equalsIgnoreCase(""))) { // Add APPLICATION_LICENSE if not empty
     		aboutBoxText = aboutBoxText.concat(
     			"<br>"
     			+ application_License
     			);
     	}
-    	if (!(application_License_HREF.equalsIgnoreCase(""))) {
+    	if (!(application_License_HREF.equalsIgnoreCase(""))) { // Add APPLICATION_LICENSE_HREF if not empty
     		aboutBoxText = aboutBoxText.concat(
     			"<br>"
     			+ "<a href=\"" + application_License_HREF + "\">" + application_License_HREF_TXT + "</a>"
     			);
     	}
-    	if (!(application_href.equalsIgnoreCase(""))) {
+    	if (!(application_href.equalsIgnoreCase(""))) { // Add APPLICATION_HREF if not empty
     		aboutBoxText = aboutBoxText.concat(
     			"<br>"
     			+ "<a href=\"" + application_href + "\">" + application_href_txt + "</a>"
     			);
     	}
+    	if (!(application_Info3.equalsIgnoreCase(""))) { // Add APPLICATION_INFO3 if not empty
+    		aboutBoxText = aboutBoxText.concat(
+    			"<br>"
+    			+ application_Info3
+    			);
+    	}
     	
     	// for copying style
-        javax.swing.JLabel label = new javax.swing.JLabel();
+        JLabel label = new JLabel();
         Font font = label.getFont();
     	
     	// create some css from the label's font
@@ -802,8 +824,8 @@ public final class MainWindow extends ChatFrame implements ActionListener {
         style.append("font-weight:" + (font.isBold() ? "bold" : "normal") + ";");
         style.append("font-size:" + font.getSize() + "pt;");
     	
-        // html content
-        javax.swing.JEditorPane ep = new javax.swing.JEditorPane
+        // assemble html
+        JEditorPane ep = new JEditorPane
         	(
         	"text/html", 
         	"<html>"
@@ -814,21 +836,35 @@ public final class MainWindow extends ChatFrame implements ActionListener {
             );
     	
         // handle link events
-        ep.addHyperlinkListener(new javax.swing.event.HyperlinkListener()
+        ep.addHyperlinkListener(new HyperlinkListener()
         {
             @Override
             public void hyperlinkUpdate(javax.swing.event.HyperlinkEvent e)
             {
-                if (e.getEventType().equals(javax.swing.event.HyperlinkEvent.EventType.ACTIVATED)) {
+            	// if a link is clicked, and it is the APPLICATION_LICENSE_HREF, then load that page
+                if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED) 
+                		&& e.getURL().toString().equalsIgnoreCase(Default.getString(Default.APPLICATION_LICENSE_HREF))) {
                 	try {
-                    	java.awt.Desktop.getDesktop().browse(
-                    			new java.net.URI(Default.getString(Default.APPLICATION_LICENSE_HREF)));
-                	java.awt.Desktop.getDesktop().browse(
-                			new java.net.URI(Default.getString(Default.APPLICATION_HREF)));
-                	} catch (java.net.URISyntaxException uriEx) {
-                		uriEx.printStackTrace();
+                    	
+                		Desktop.getDesktop().browse(
+                    			new URI(Default.getString(Default.APPLICATION_LICENSE_HREF)));
+                	} catch (URISyntaxException uriEx) {
+                		Log.error("The APPLICATION_LICENSE_HREF was malformed or invalid.", uriEx);
                 	} catch (IOException ioEx) {
-                		ioEx.printStackTrace();
+                		Log.error("Browser did not launch.", ioEx);
+                	}
+                // else if a link is clicked, and it is the APPLICATION_HREF, then load that page
+                } else if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED) 
+                		&& e.getURL().toString().equalsIgnoreCase(Default.getString(Default.APPLICATION_HREF))) {
+                	try {
+                    	
+                    	Desktop.getDesktop().browse(
+                			new URI(Default.getString(Default.APPLICATION_HREF)));
+                	
+                	} catch (URISyntaxException uriEx) {
+                		Log.error("The APPLICATION_HREF was malformed or invalid.", uriEx);
+                	} catch (IOException ioEx) {
+                		Log.error("Browser did not launch.", ioEx);
                 	}
                 }
                 
@@ -837,10 +873,14 @@ public final class MainWindow extends ChatFrame implements ActionListener {
         ep.setEditable(false);
         ep.setBackground(label.getBackground());
         
-    	
-//    	JXHyperlink href = new JXHyperlink(new ClickLinkAction());
-    	
-        JOptionPane.showMessageDialog(SparkManager.getMainWindow(), ep,
+        return ep;
+    }
+
+    /**
+     * Displays the About Box for Spark.
+     */
+    private static void showAboutBox() {   	
+        JOptionPane.showMessageDialog(SparkManager.getMainWindow(), getAboutBoxText(),
             Res.getString("title.about"), JOptionPane.INFORMATION_MESSAGE, SparkRes.getImageIcon(SparkRes.MAIN_IMAGE));
     }
 
@@ -921,14 +961,4 @@ public final class MainWindow extends ChatFrame implements ActionListener {
         }
         return this.splitPane;
     }
-}
-
-class ClickLinkAction extends AbstractAction {
-	public ClickLinkAction() {
-		super.putValue(Action.NAME, Default.getString(Default.APPLICATION_HREF));
-		super.putValue(Action.SHORT_DESCRIPTION, Default.getString(Default.APPLICATION_HREF_TXT));
-	}
-	public void actionPerformed(ActionEvent e) {
-		System.out.println("Clicked HREF!");
-	}
 }

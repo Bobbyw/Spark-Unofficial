@@ -213,6 +213,12 @@
 
 	<!-- resources =================================================================================== -->
 	<target name="resources">
+		<tstamp>
+			<format property="build.timestamp" pattern="yyyy-MM-dd" locale="en,US"/>
+		</tstamp>
+		<propertyfile file="${basedir}/src/java/org/jivesoftware/resource/default.properties">
+			<entry key="BUILD_DATE" type="string" value="${build.timestamp}"/>
+		</propertyfile>
 		<copy todir="${classes}">
 			<fileset dir="${resources.dir}">
 				<include name="**/*"/>
