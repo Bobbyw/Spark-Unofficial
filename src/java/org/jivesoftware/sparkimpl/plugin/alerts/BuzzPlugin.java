@@ -51,24 +51,27 @@ public class BuzzPlugin implements Plugin {
     private static final String ELEMENTNAME = "attention";
     private static final String NAMESPACE = "urn:xmpp:attention:0";
 
-    private static final String ELEMENTNAME_OLD = "buzz";
-    private static final String NAMESPACE_OLD = "http://www.jivesoftware.com/spark";
+    /* Removed for XEP-0224 Compliance */
+//    private static final String ELEMENTNAME_OLD = "buzz";
+//    private static final String NAMESPACE_OLD = "http://www.jivesoftware.com/spark";
 
     public void initialize() {
 	ProviderManager.getInstance().addExtensionProvider(ELEMENTNAME,
 		NAMESPACE, BuzzPacket.class);
 
-	ProviderManager.getInstance().addExtensionProvider(ELEMENTNAME_OLD,
-		NAMESPACE_OLD, BuzzPacket.class);
+	/* Removed for XEP-0224 Compliance */
+//	ProviderManager.getInstance().addExtensionProvider(ELEMENTNAME_OLD,
+//		NAMESPACE_OLD, BuzzPacket.class);
 
 	SparkManager.getConnection().addPacketListener(new PacketListener() {
 	    public void processPacket(Packet packet) {
 		if (packet instanceof Message) {
 		    final Message message = (Message) packet;
 
-		    boolean buzz = message.getExtension(ELEMENTNAME_OLD,
+		    				/* Removed for XEP-0224 Compliance */
+		    boolean buzz = /*message.getExtension(ELEMENTNAME_OLD,
 			    NAMESPACE_OLD) != null
-			    || message.getExtension(ELEMENTNAME, NAMESPACE) != null;
+			    ||*/ message.getExtension(ELEMENTNAME, NAMESPACE) != null;
 		    if (buzz) {
 			SwingUtilities.invokeLater(new Runnable() {
 			    public void run() {
